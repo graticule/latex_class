@@ -16,13 +16,13 @@
 		\ifx\szf@mode\szf@review
 		\@szfreviewtrue
 		\else
-		\ifx\szf@mode\szf@final
-		\@szfreviewfalse
-		\else
-		\ClassError{szf}
-		{Unknown mode `#1'}
-		{Use mode=review or mode=final}%
-		\fi
+			\ifx\szf@mode\szf@final
+			\@szfreviewfalse
+			\else
+			\ClassError{szf}
+			{Unknown mode `#1'}
+			{Use mode=review or mode=final}%
+			\fi
 		\fi
 	},
 	mode.usage = load,
@@ -137,6 +137,31 @@
 	\textsuperscript{#1}#2\par
 }
 
+% Article metadata
+% --- UDC storage and interface ---
+
+\ExplSyntaxOn
+
+\seq_new:N \g_szf_udc_seq
+
+\NewDocumentCommand \udc { m }
+  {
+    \seq_gput_right:Nn \g_szf_udc_seq {#1}
+  }
+
+\cs_new_protected:Npn \szf_print_udc:
+  {
+    \seq_if_empty:NF \g_szf_udc_seq
+      {
+        УДК~
+        \seq_use:Nn \g_szf_udc_seq {;~}
+      }
+  }
+
+\cs_new_eq:NN \szf@printudc \szf_print_udc:
+
+\ExplSyntaxOff
+
 % Аннотация и ключевые слова
 
 \let\szf@abstract\@empty
@@ -156,6 +181,9 @@
 
 \renewcommand\@maketitle{%
 	\begin{center}
+
+		{\small\raggedright\szf@printudc\par}
+
 		{\Large\bfseries \@title\par}
 		
 		\vspace{1em}
