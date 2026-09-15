@@ -1,0 +1,35 @@
+\documentclass[mode=review]{szf}
+
+\usepackage{lipsum}
+
+\title{Название статьи}
+
+\author[affiliation={1},corresponding=true,
+email={ivanov@example.ru}]
+{Иванов И. И.}
+
+\author[affiliation={1,2}]
+{Петров Б. Ф.}
+
+\affiliation[1]{Институт физики, Владивосток, Россия}
+\affiliation[2]{Государственный универститет, Москва, Россия}
+
+\begin{abstract}
+	\lipsum[1]
+\end{abstract}
+
+\keywords{ключевое слово 1; ключевое слово 2; ключевое слово 3}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section{Test}
+	
+	\lipsum[1-5]
+	
+	\section{Test 2}
+	
+	\lipsum[1-4]
+	
+\end{document}
