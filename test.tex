@@ -17,11 +17,19 @@ email={ivanov@example.ru}]
 \author[affiliation={1,2}]
 {Петров Б. Ф.}
 
-\author[affiliation={2},email={kuznetsov@sample.com}]
+% Автор с отсутствующей аффилиацией
+\author[affiliation={3},email={kuznetsov@sample.com}]
 {Кузнецов Я. А.}
+
+% Автор без аффилиации
+\author{Сидоров А. А.}
+
+% Corresponding author без email
+\author[affiliation={1},corresponding=true]{Смирнов В. В.}
 
 \affiliation[1]{Институт физики, Владивосток, Россия}
 \affiliation[2]{Государственный универститет, Москва, Россия}
+\affiliation[4]{Космический проект, Сыктывкар, Россия}
 
 \begin{abstract}
 	\lipsum[1]
