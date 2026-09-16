@@ -149,6 +149,34 @@
 	\textsuperscript{#1}#2\par
 }
 
+% --- Common metadata helpers ---
+
+\ExplSyntaxOn
+
+\cs_new_protected:Npn \szf_metadata_store:Nnn #1#2#3
+  {
+    \str_case:nnF {#2}
+      {
+        { russian }
+          {
+            \prop_gput:Nnn #1 { russian } {#3}
+          }
+        { english }
+          {
+            \prop_gput:Nnn #1 { english } {#3}
+          }
+      }
+      {
+        \ClassError{szf}
+          {Unknown~metadata~language~`#2'}
+          {Use~russian~or~english}
+      }
+  }
+
+\cs_generate_variant:Nn \szf_metadata_store:Nnn { NVn }
+
+\ExplSyntaxOff
+
 % Article metadata
 
 % --- Title storage and interface ---
@@ -159,29 +187,14 @@
 
 \cs_new_protected:Npn \szf_title_store:nn #1#2
   {
-    \str_case:nnF {#1}
-      {
-        { russian }
-          {
-            \prop_gput:Nnn \g_szf_title_prop { russian } {#2}
-            \if@szfrussian
-              \gdef\@title{#2}
-            \fi
-          }
+    \szf_metadata_store:Nnn
+      \g_szf_title_prop
+      {#1}
+      {#2}
 
-        { english }
-          {
-            \prop_gput:Nnn \g_szf_title_prop { english } {#2}
-            \if@szfrussian
-            \else
-              \gdef\@title{#2}
-            \fi
-          }
-      }
+    \tl_if_eq:VnT \g_szf_language_tl {#1}
       {
-        \ClassError{szf}
-          {Unknown~title~language~`#1'}
-          {Use~russian~or~english}
+        \gdef\@title{#2}
       }
   }
 
@@ -251,12 +264,18 @@
 
 \cs_new_protected:Npn \szf_abstract_store:nn #1#2
   {
-    \prop_gput:Nnn \g_szf_abstract_prop {#1} {#2}
+    \szf_metadata_store:Nnn
+      \g_szf_abstract_prop
+      {#1}
+      {#2}
   }
 
 \cs_new_protected:Npn \szf_keywords_store:nn #1#2
   {
-    \prop_gput:Nnn \g_szf_keywords_prop {#1} {#2}
+    \szf_metadata_store:Nnn
+      \g_szf_keywords_prop
+      {#1}
+      {#2}
   }
 
 \cs_generate_variant:Nn \szf_abstract_store:nn { Vn }
