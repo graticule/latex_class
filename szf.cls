@@ -135,19 +135,55 @@
 	\endgroup
 }
 
-% Аффилиации
+% --- Affiliations storage and interface ---
 
-\let\szf@affiliations\@empty
+\ExplSyntaxOn
 
-\NewDocumentCommand{\affiliation}{O{} m}{%
-	\g@addto@macro\szf@affiliations{%
-		\szf@affiliationitem{#1}{#2}%
-	}%
-}
+\prop_new:N \g_szf_affiliation_prop
+\seq_new:N  \g_szf_affiliation_order_seq
 
-\newcommand\szf@affiliationitem[2]{%
-	\textsuperscript{#1}#2\par
-}
+\NewDocumentCommand \affiliation { O{} m }
+  {
+    \tl_if_blank:nTF {#1}
+      {
+        \ClassError{szf}
+          {Affiliation~identifier~is~missing}
+          {Use~\string\affiliation[<id>]{<text>}}
+      }
+      {
+        \prop_if_in:NnTF \g_szf_affiliation_prop {#1}
+          {
+            \ClassError{szf}
+              {Affiliation~`#1'~is~already~defined}
+              {Use~a~unique~affiliation~identifier}
+          }
+          {
+            \prop_gput:Nnn \g_szf_affiliation_prop {#1} {#2}
+            \seq_gput_right:Nn \g_szf_affiliation_order_seq {#1}
+          }
+      }
+  }
+
+\cs_new_protected:Npn \szf_print_affiliations:
+  {
+    \seq_map_inline:Nn \g_szf_affiliation_order_seq
+      {
+        \prop_get:NnN
+          \g_szf_affiliation_prop
+          {##1}
+          \l_tmpa_tl
+
+        \textsuperscript{##1}
+        \tl_use:N \l_tmpa_tl
+        \par
+      }
+  }
+
+\cs_new_eq:NN
+  \szf@printaffiliations
+  \szf_print_affiliations:
+
+\ExplSyntaxOff
 
 % --- Common metadata helpers ---
 
@@ -360,7 +396,7 @@
 		\vspace{0.8em}
 		
 		{\small
-			\szf@affiliations
+			\szf@printaffiliations
 		}
 		
 		\ifx\szf@correspondence\@empty
