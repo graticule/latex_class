@@ -1,4 +1,6 @@
-\documentclass[mode=review]{szf}
+\documentclass[mode=review%
+%,language=english%
+]{szf}
 
 \usepackage{lipsum}
 \udc{53.31}
@@ -6,6 +8,7 @@
 \udc{51.72}
 
 \title{Название статьи}
+\title[english]{English title of the article}
 
 \author[affiliation={1},corresponding=true,
 email={ivanov@example.ru}]
@@ -14,6 +17,9 @@ email={ivanov@example.ru}]
 \author[affiliation={1,2}]
 {Петров Б. Ф.}
 
+\author[affiliation={2},email={kuznetsov@sample.com}]
+{Кузнецов Я. А.}
+
 \affiliation[1]{Институт физики, Владивосток, Россия}
 \affiliation[2]{Государственный универститет, Москва, Россия}
 
@@ -21,7 +27,13 @@ email={ivanov@example.ru}]
 	\lipsum[1]
 \end{abstract}
 
+\begin{abstract}[english]
+English abstract. \lipsum[2]
+\end{abstract}
+
 \keywords{ключевое слово 1; ключевое слово 2; ключевое слово 3}
+
+\keywords[english]{keyword 1; keyword 2; keyword 3}
 
 \begin{document}
 	

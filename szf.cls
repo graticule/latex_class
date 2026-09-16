@@ -79,61 +79,177 @@
 
 % Собираем титульный лист
 
-% Авторы
+% --- Authors storage and interface ---
 
-\let\szf@authors\@empty
-\let\szf@correspondence\@empty
+\ExplSyntaxOn
 
-\DeclareKeys[szf/author]
-{
-	affiliation.store = \szf@author@affiliation,
-	email.store       = \szf@author@email,
-	corresponding.if  = @szf@author@corresponding
-}
+\int_new:N  \g_szf_author_int
+\seq_new:N  \g_szf_author_order_seq
+\prop_new:N \g_szf_author_prop
 
-\RenewDocumentCommand{\author}{O{} m}{%
-	\g@addto@macro\szf@authors{%
-		\szf@authoritem{#2}{#1}%
-	}%
-}
+\clist_new:N \l_szf_author_affiliations_clist
+\tl_new:N    \l_szf_author_email_tl
+\bool_new:N  \l_szf_author_corresponding_bool
 
-\newcommand\szf@authoritem[2]{%
-	\begingroup
-	\def\szf@author@affiliation{}%
-	\def\szf@author@email{}%
-	\@szf@author@correspondingfalse
-	
-	\SetKeys[szf/author]{#2}%
-	
-	\if@szf@author@corresponding
-	\g@addto@macro\szf@correspondence{%
-		\szf@correspondenceitem{#1}{#2}%
-	}%
-	\fi
-	
-	#1%
-	\ifx\szf@author@affiliation\@empty
-	\else
-		\textsuperscript{\szf@author@affiliation}%
-	\fi
-	\if@szf@author@corresponding
-		\textsuperscript{*}%
-	\fi
-	\quad
-	\endgroup
-}
+\keys_define:nn { szf / author }
+  {
+    affiliation .clist_set:N =
+      \l_szf_author_affiliations_clist,
 
-\newcommand\szf@correspondenceitem[2]{%
-	\begingroup
-	\def\szf@author@email{}%
-	\SetKeys[szf/author]{#2}%
-	#1%
-	\ifx\szf@author@email\@empty
-	\else
-	: \szf@author@email
-	\fi
-	\endgroup
-}
+    email .tl_set:N =
+      \l_szf_author_email_tl,
+
+    corresponding .bool_set:N =
+      \l_szf_author_corresponding_bool,
+
+    corresponding .default:n = true
+  }
+
+\cs_generate_variant:Nn \prop_gput:Nnn { Nxn, NxV }
+\cs_generate_variant:Nn \prop_get:NnN  { NxN }
+
+\RenewDocumentCommand \author { O{} m }
+  {
+    \clist_clear:N \l_szf_author_affiliations_clist
+    \tl_clear:N    \l_szf_author_email_tl
+    \bool_set_false:N \l_szf_author_corresponding_bool
+
+    \keys_set:nn { szf / author } {#1}
+
+    \int_gincr:N \g_szf_author_int
+
+    \seq_gput_right:Nx
+      \g_szf_author_order_seq
+      { \int_use:N \g_szf_author_int }
+
+    \prop_gput:Nxn
+      \g_szf_author_prop
+      { \int_use:N \g_szf_author_int / name }
+      {#2}
+
+    \prop_gput:NxV
+      \g_szf_author_prop
+      { \int_use:N \g_szf_author_int / affiliations }
+      \l_szf_author_affiliations_clist
+
+    \prop_gput:NxV
+      \g_szf_author_prop
+      { \int_use:N \g_szf_author_int / email }
+      \l_szf_author_email_tl
+
+    \bool_if:NTF \l_szf_author_corresponding_bool
+      {
+        \prop_gput:Nxn
+          \g_szf_author_prop
+          { \int_use:N \g_szf_author_int / corresponding }
+          { true }
+      }
+      {
+        \prop_gput:Nxn
+          \g_szf_author_prop
+          { \int_use:N \g_szf_author_int / corresponding }
+          { false }
+      }
+  }
+
+\cs_new_protected:Npn \szf_print_author:n #1
+  {
+    \prop_get:NxN
+      \g_szf_author_prop
+      { #1 / name }
+      \l_tmpa_tl
+
+    \tl_use:N \l_tmpa_tl
+
+    \prop_get:NxN
+      \g_szf_author_prop
+      { #1 / affiliations }
+      \l_tmpa_tl
+
+    \tl_if_blank:VF \l_tmpa_tl
+      {
+        \clist_set:NV \l_tmpa_clist \l_tmpa_tl
+        \textsuperscript{
+          \clist_use:Nn \l_tmpa_clist { , }
+        }
+      }
+
+    \prop_get:NxN
+      \g_szf_author_prop
+      { #1 / corresponding }
+      \l_tmpa_tl
+
+    \tl_if_eq:NnT \l_tmpa_tl { true }
+      {
+        \textsuperscript{*}
+      }
+  }
+
+\cs_new_protected:Npn \szf_print_authors:
+  {
+    \seq_map_inline:Nn \g_szf_author_order_seq
+      {
+        \szf_print_author:n {##1}
+        \quad
+      }
+  }
+
+\cs_new_protected:Npn \szf_print_correspondence:
+  {
+    \bool_set_false:N \l_tmpa_bool
+
+    \seq_map_inline:Nn \g_szf_author_order_seq
+      {
+        \prop_get:NxN
+          \g_szf_author_prop
+          { ##1 / corresponding }
+          \l_tmpa_tl
+
+        \tl_if_eq:NnT \l_tmpa_tl { true }
+          {
+            \bool_if:NF \l_tmpa_bool
+              {
+                \vspace{0.5em}
+                \par
+                \small
+                \textsuperscript{*}
+                \bool_set_true:N \l_tmpa_bool
+              }
+
+            \prop_get:NxN
+              \g_szf_author_prop
+              { ##1 / name }
+              \l_tmpa_tl
+
+            \tl_use:N \l_tmpa_tl
+
+            \prop_get:NxN
+              \g_szf_author_prop
+              { ##1 / email }
+              \l_tmpa_tl
+
+            \tl_if_blank:VF \l_tmpa_tl
+              {
+                :~\tl_use:N \l_tmpa_tl
+              }
+
+            \quad
+          }
+      }
+
+    \bool_if:NT \l_tmpa_bool
+      {
+        \par
+      }
+  }
+
+\cs_new_eq:NN \szf@printauthors
+  \szf_print_authors:
+
+\cs_new_eq:NN \szf@printcorrespondence
+  \szf_print_correspondence:
+
+\ExplSyntaxOff
 
 % --- Affiliations storage and interface ---
 
@@ -389,23 +505,17 @@
 		\vspace{1em}
 		
 		{\normalsize
-			\szf@authors
+			\szf@printauthors
 			\par
 		}
-		
+
 		\vspace{0.8em}
-		
+
 		{\small
 			\szf@printaffiliations
 		}
-		
-		\ifx\szf@correspondence\@empty
-		\else
-		\vspace{0.5em}
-		{\small
-			\textsuperscript{*}\szf@correspondence\par
-		}
-		\fi
+
+		\szf@printcorrespondence
 		
 		\szf@printabstract
 		
