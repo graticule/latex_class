@@ -185,6 +185,86 @@
       }
   }
 
+\prop_new:N \l_szf_used_affiliation_prop
+
+\cs_new_protected:Npn \szf_mark_author_affiliations:n #1
+  {
+    \prop_get:NxN
+      \g_szf_author_prop
+      { #1 / affiliations }
+      \l_tmpa_tl
+
+    \tl_if_blank:VF \l_tmpa_tl
+      {
+        \clist_set:NV \l_tmpa_clist \l_tmpa_tl
+
+        \clist_map_inline:Nn \l_tmpa_clist
+          {
+            \prop_put:Nnn
+              \l_szf_used_affiliation_prop
+              {##1}
+              { }
+          }
+      }
+  }
+
+\cs_new_protected:Npn \szf_warn_unused_affiliations:
+  {
+    \seq_map_inline:Nn \g_szf_affiliation_order_seq
+      {
+        \prop_if_in:NnF
+          \l_szf_used_affiliation_prop
+          {##1}
+          {
+            \ClassWarning{szf}
+              {Affiliation~`##1'~is~defined~but~not~used~by~any~author}
+          }
+      }
+  }
+
+\cs_new_protected:Npn \szf_validate_author:n #1
+  {
+    \prop_get:NxN
+      \g_szf_author_prop
+      { #1 / affiliations }
+      \l_tmpa_tl
+
+    \tl_if_blank:VF \l_tmpa_tl
+      {
+        \clist_set:NV \l_tmpa_clist \l_tmpa_tl
+
+        \clist_map_inline:Nn \l_tmpa_clist
+          {
+            \prop_if_in:NnF
+              \g_szf_affiliation_prop
+              {##1}
+              {
+                \ClassError{szf}
+                  {Author~#1~references~undefined~affiliation~`##1'}
+                  {Define~the~affiliation~with~
+                   \string\affiliation[##1]{...}}
+              }
+          }
+      }
+  }
+
+\cs_new_protected:Npn \szf_validate_authors:
+  {
+    \prop_clear:N \l_szf_used_affiliation_prop
+
+    \seq_map_inline:Nn \g_szf_author_order_seq
+      {
+        \szf_validate_author:n {##1}
+        \szf_mark_author_affiliations:n {##1}
+      }
+
+    \szf_warn_unused_affiliations:
+  }
+
+\cs_new_eq:NN
+  \szf@validateauthors
+  \szf_validate_authors:
+
 \cs_new_protected:Npn \szf_print_authors:
   {
     \seq_map_inline:Nn \g_szf_author_order_seq
@@ -503,6 +583,8 @@
 		{\Large\bfseries \szf@printtitle\par}
 		
 		\vspace{1em}
+
+		\szf@validateauthors
 		
 		{\normalsize
 			\szf@printauthors
