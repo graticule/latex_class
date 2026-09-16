@@ -1,4 +1,4 @@
-\NeedsTeXFormat{LaTeX2e}
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \ProvidesClass{szf}[2026/09/11 Journal class]
 
 % Режим отображения final/review
