@@ -224,6 +224,7 @@
 
 \cs_new_protected:Npn \szf_validate_author:n #1
   {
+    % Check affiliation references.
     \prop_get:NxN
       \g_szf_author_prop
       { #1 / affiliations }
@@ -244,6 +245,26 @@
                   {Define~the~affiliation~with~
                    \string\affiliation[##1]{...}}
               }
+          }
+      }
+
+    % Check corresponding-author data.
+    \prop_get:NxN
+      \g_szf_author_prop
+      { #1 / corresponding }
+      \l_tmpa_tl
+
+    \tl_if_eq:NnT \l_tmpa_tl { true }
+      {
+        \prop_get:NxN
+          \g_szf_author_prop
+          { #1 / email }
+          \l_tmpa_tl
+
+        \tl_if_blank:VT \l_tmpa_tl
+          {
+            \ClassWarning{szf}
+              {Corresponding~author~#1~has~no~email~address}
           }
       }
   }
