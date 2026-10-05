@@ -69,13 +69,31 @@
 \RequirePackage[russian,english]{babel}
 \fi
 
-\if@szfrussian
-\def\szf@abstractname{Аннотация}
-\def\szf@keywordsname{Ключевые слова}
-\else
-\def\szf@abstractname{Abstract}
-\def\szf@keywordsname{Keywords}
-\fi
+\ExplSyntaxOn
+
+\prop_new:N \g_szf_label_prop
+
+\prop_gput:Nnn
+  \g_szf_label_prop
+  { abstract / russian }
+  { Аннотация }
+
+\prop_gput:Nnn
+  \g_szf_label_prop
+  { abstract / english }
+  { Abstract }
+
+\prop_gput:Nnn
+  \g_szf_label_prop
+  { keywords / russian }
+  { Ключевые~слова }
+
+\prop_gput:Nnn
+  \g_szf_label_prop
+  { keywords / english }
+  { Keywords }
+
+\ExplSyntaxOff
 
 % Собираем титульный лист
 
@@ -108,7 +126,7 @@
 \cs_generate_variant:Nn \prop_gput:Nnn { Nxn, NxV }
 \cs_generate_variant:Nn \prop_get:NnN  { NxN }
 
-\RenewDocumentCommand \author { O{} m }
+\RenewDocumentCommand \author { O{} m m }
   {
     \clist_clear:N \l_szf_author_affiliations_clist
     \tl_clear:N    \l_szf_author_email_tl
@@ -124,8 +142,13 @@
 
     \prop_gput:Nxn
       \g_szf_author_prop
-      { \int_use:N \g_szf_author_int / name }
+      { \int_use:N \g_szf_author_int / name / russian }
       {#2}
+    
+    \prop_gput:Nxn
+      \g_szf_author_prop
+      { \int_use:N \g_szf_author_int / name / english }
+      {#3}
 
     \prop_gput:NxV
       \g_szf_author_prop
@@ -152,11 +175,11 @@
       }
   }
 
-\cs_new_protected:Npn \szf_print_author:n #1
+\cs_new_protected:Npn \szf_print_author:nn #1 #2
   {
     \prop_get:NxN
       \g_szf_author_prop
-      { #1 / name }
+      { #1 / name / #2 }
       \l_tmpa_tl
 
     \tl_use:N \l_tmpa_tl
@@ -236,14 +259,14 @@
 
         \clist_map_inline:Nn \l_tmpa_clist
           {
-            \prop_if_in:NnF
-              \g_szf_affiliation_prop
-              {##1}
+            \seq_if_in:NnF
+              \g_szf_affiliation_order_seq
+              {##1 }
               {
                 \ClassError{szf}
                   {Author~#1~references~undefined~affiliation~`##1'}
                   {Define~the~affiliation~with~
-                   \string\affiliation[##1]{...}}
+                   \string\affiliation[##1]{<russian>}{<english>}}
               }
           }
       }
@@ -269,29 +292,82 @@
       }
   }
 
-\cs_new_protected:Npn \szf_validate_authors:
-  {
-    \prop_clear:N \l_szf_used_affiliation_prop
+\cs_generate_variant:Nn \prop_if_in:NnTF { NVTF }
 
-    \seq_map_inline:Nn \g_szf_author_order_seq
+\cs_new_protected:Npn \szf_validate_metadata:
+  {
+    \prop_if_in:NVF
+      \g_szf_title_prop
+      \g_szf_language_tl
       {
-        \szf_validate_author:n {##1}
-        \szf_mark_author_affiliations:n {##1}
+        \ClassError{szf}
+          {Title~is~not~specified}
+          {Specify~the~article~title~for~the~current~language}
       }
 
-    \szf_warn_unused_affiliations:
+    \prop_if_in:NVF
+      \g_szf_abstract_prop
+      \g_szf_language_tl
+      {
+        \ClassError{szf}
+          {Abstract~is~not~specified}
+          {Specify~the~abstract~for~the~current~language}
+      }
+
+    \prop_if_in:NVF
+      \g_szf_keywords_prop
+      \g_szf_language_tl
+      {
+        \ClassError{szf}
+          {Keywords~are~not~specified}
+          {Specify~the~keywords~for~the~current~language}
+      }
   }
 
-\cs_new_eq:NN
-  \szf@validateauthors
-  \szf_validate_authors:
-
-\cs_new_protected:Npn \szf_print_authors:
+\cs_new_protected:Npn \szf_print_title:n #1
   {
-    \seq_map_inline:Nn \g_szf_author_order_seq
+    \prop_get:NnN
+      \g_szf_title_prop
+      { #1 }
+      \l_tmpa_tl
+
+    \tl_use:N \l_tmpa_tl
+  }
+
+\msg_new:nnn
+{szf}
+{no-author}
+{No~authors~have~been~specified.}
+
+\cs_new_protected:Npn \szf_validate_authors:
+  {
+    \seq_if_empty:NTF \g_szf_author_order_seq
+    {
+      \msg_error:nn
+        {szf}
+        {no-author}
+    }
+    {
+      \prop_clear:N \l_szf_used_affiliation_prop
+
+      \seq_map_inline:Nn \g_szf_author_order_seq
+        {
+          \szf_validate_author:n {##1}
+          \szf_mark_author_affiliations:n {##1}
+        }
+
+      \szf_warn_unused_affiliations:
+    }
+  }
+
+\cs_new_protected:Npn \szf_print_authors:n #1
+  {
+    \seq_map_indexed_inline:Nn \g_szf_author_order_seq
       {
-        \szf_print_author:n {##1}
-        \quad
+        \szf_print_author:nn {##2}{#1}
+        \int_compare:nT
+          {##1 < \seq_count:N \g_szf_author_order_seq }
+          { \quad }
       }
   }
 
@@ -319,7 +395,7 @@
 
             \prop_get:NxN
               \g_szf_author_prop
-              { ##1 / name }
+              { ##1 / name / \tl_use:N \g_szf_language_tl }
               \l_tmpa_tl
 
             \tl_use:N \l_tmpa_tl
@@ -345,7 +421,7 @@
   }
 
 \cs_new_eq:NN \szf@printauthors
-  \szf_print_authors:
+  \szf_print_authors:n
 
 \cs_new_eq:NN \szf@printcorrespondence
   \szf_print_correspondence:
@@ -359,35 +435,36 @@
 \prop_new:N \g_szf_affiliation_prop
 \seq_new:N  \g_szf_affiliation_order_seq
 
-\NewDocumentCommand \affiliation { O{} m }
+\NewDocumentCommand \affiliation { O{} m m }
   {
     \tl_if_blank:nTF {#1}
       {
         \ClassError{szf}
           {Affiliation~identifier~is~missing}
-          {Use~\string\affiliation[<id>]{<text>}}
+          {Use~\string\affiliation[<id>]{<russian>}{<english>}}
       }
       {
-        \prop_if_in:NnTF \g_szf_affiliation_prop {#1}
+        \seq_if_in:NnTF \g_szf_affiliation_order_seq {#1}
           {
             \ClassError{szf}
               {Affiliation~`#1'~is~already~defined}
               {Use~a~unique~affiliation~identifier}
           }
           {
-            \prop_gput:Nnn \g_szf_affiliation_prop {#1} {#2}
+            \prop_gput:Nnn \g_szf_affiliation_prop {#1 / russian} {#2}
+            \prop_gput:Nnn \g_szf_affiliation_prop {#1 / english} {#3}
             \seq_gput_right:Nn \g_szf_affiliation_order_seq {#1}
           }
       }
   }
 
-\cs_new_protected:Npn \szf_print_affiliations:
+\cs_new_protected:Npn \szf_print_affiliations:n #1
   {
     \seq_map_inline:Nn \g_szf_affiliation_order_seq
       {
-        \prop_get:NnN
+        \prop_get:NxN
           \g_szf_affiliation_prop
-          {##1}
+          {##1 / #1}
           \l_tmpa_tl
 
         \textsuperscript{##1}
@@ -398,7 +475,7 @@
 
 \cs_new_eq:NN
   \szf@printaffiliations
-  \szf_print_affiliations:
+  \szf_print_affiliations:n
 
 \ExplSyntaxOff
 
@@ -464,22 +541,7 @@
       }
   }
 
-\cs_new_protected:Npn \szf_print_title:
-  {
-    \prop_get:NVNTF
-      \g_szf_title_prop
-      \g_szf_language_tl
-      \l_tmpa_tl
-      {
-        \tl_use:N \l_tmpa_tl
-      }
-      {
-        \ClassWarning{szf}
-          {Title~for~language~`\tl_use:N \g_szf_language_tl'~is~not~specified}
-      }
-  }
-
-\cs_new_eq:NN \szf@printtitle \szf_print_title:
+\cs_new_eq:NN \szf@printtitle \szf_print_title:n
 
 \ExplSyntaxOff
 
@@ -557,77 +619,102 @@
       }
   }
 
-\cs_new_protected:Npn \szf_print_abstract:
+\cs_new_protected:Npn \szf_print_abstract:n #1
   {
-    \prop_get:NVNT
+    \prop_get:NnNT
       \g_szf_abstract_prop
-      \g_szf_language_tl
+      { #1 }
       \l_tmpa_tl
+    \prop_get:NnN
+      \g_szf_label_prop
+      { abstract / #1 }
+      \l_tmpb_tl
       {
         \vspace{1em}
         \begin{minipage}{\textwidth}
           \small
-          \textbf{\szf@abstractname.~}
+          \textbf{\tl_use:N \l_tmpb_tl.~}
           \tl_use:N \l_tmpa_tl
         \end{minipage}
       }
   }
 
-\cs_new_protected:Npn \szf_print_keywords:
+\cs_new_protected:Npn \szf_print_keywords:n #1
   {
-    \prop_get:NVNT
+    \prop_get:NnNT
       \g_szf_keywords_prop
-      \g_szf_language_tl
+      { #1 }
       \l_tmpa_tl
-      {
-        \vspace{0.5em}
-        \begin{minipage}{\textwidth}
-          \small
-          \textbf{\szf@keywordsname{}:~}
-          \tl_use:N \l_tmpa_tl
-        \end{minipage}
-      }
+    \prop_get:NnN
+      \g_szf_label_prop
+      { keywords / #1 }
+      \l_tmpb_tl
+    {
+      \vspace{0.5em}
+      \begin{minipage}{\textwidth}
+        \small
+        \textbf{\tl_use:N \l_tmpb_tl{}:~}
+        \tl_use:N \l_tmpa_tl
+      \end{minipage}
+    }
   }
 
-\cs_new_eq:NN \szf@printabstract \szf_print_abstract:
-\cs_new_eq:NN \szf@printkeywords \szf_print_keywords:
+\cs_new_eq:NN \szf@printabstract \szf_print_abstract:n
+\cs_new_eq:NN \szf@printkeywords \szf_print_keywords:n
+
+\cs_new_protected:Npn \szf_print_metadata:N #1
+{
+  \if@szfreview
+		#1{russian}\par
+    #1{english}\par
+  \else
+		\exp_args:NV #1 \g_szf_language_tl
+  \fi
+}
+
+\cs_new_eq:NN \szf@printmeta \szf_print_metadata:N
 
 \ExplSyntaxOff
 
 % MakeTitle
 
-\renewcommand\@maketitle{%
+\ExplSyntaxOn
+
+\cs_new:Npn \szf_make_title:
+{
+  \szf_validate_metadata:
+  \szf_validate_authors:      
 	\begin{center}
 
 		{\small\raggedright\szf@printudc\par}
 
-		{\Large\bfseries \szf@printtitle\par}
+    {\Large\bfseries \szf@printmeta \szf@printtitle }
 		
 		\vspace{1em}
 
-		\szf@validateauthors
-		
-		{\normalsize
-			\szf@printauthors
-			\par
-		}
+    {\normalsize \szf@printmeta \szf@printauthors }
 
 		\vspace{0.8em}
 
-		{\small
-			\szf@printaffiliations
-		}
-
+    {\small \szf@printmeta \szf@printaffiliations }
+    
 		\szf@printcorrespondence
 		
-		\szf@printabstract
+    {\szf@printmeta \szf@printabstract}
+    
+    {\szf@printmeta \szf@printkeywords}
 		
-		\szf@printkeywords
-
 	\end{center}
 	
 	\vspace{1em}
 }
+
+\cs_set_protected:Npn \@maketitle 
+{
+  \szf_make_title:
+}
+
+\ExplSyntaxOff
 
 % Нумерация строк в режиме рецензирования
 \if@szfreview
