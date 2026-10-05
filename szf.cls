@@ -420,12 +420,6 @@
       }
   }
 
-\cs_new_eq:NN \szf@printauthors
-  \szf_print_authors:n
-
-\cs_new_eq:NN \szf@printcorrespondence
-  \szf_print_correspondence:
-
 \ExplSyntaxOff
 
 % --- Affiliations storage and interface ---
@@ -472,10 +466,6 @@
         \par
       }
   }
-
-\cs_new_eq:NN
-  \szf@printaffiliations
-  \szf_print_affiliations:n
 
 \ExplSyntaxOff
 
@@ -541,8 +531,6 @@
       }
   }
 
-\cs_new_eq:NN \szf@printtitle \szf_print_title:n
-
 \ExplSyntaxOff
 
 
@@ -565,8 +553,6 @@
         \seq_use:Nn \g_szf_udc_seq {;~}
       }
   }
-
-\cs_new_eq:NN \szf@printudc \szf_print_udc:
 
 \ExplSyntaxOff
 
@@ -659,9 +645,6 @@
     }
   }
 
-\cs_new_eq:NN \szf@printabstract \szf_print_abstract:n
-\cs_new_eq:NN \szf@printkeywords \szf_print_keywords:n
-
 \cs_new_protected:Npn \szf_print_metadata:N #1
 {
   \if@szfreview
@@ -672,37 +655,35 @@
   \fi
 }
 
-\cs_new_eq:NN \szf@printmeta \szf_print_metadata:N
-
 \ExplSyntaxOff
 
 % MakeTitle
 
 \ExplSyntaxOn
 
-\cs_new:Npn \szf_make_title:
+\cs_new_protected:Npn \szf_make_title:
 {
   \szf_validate_metadata:
   \szf_validate_authors:      
 	\begin{center}
 
-		{\small\raggedright\szf@printudc\par}
+		{\small\raggedright\szf_print_udc: \par}
 
-    {\Large\bfseries \szf@printmeta \szf@printtitle }
+    {\Large\bfseries \szf_print_metadata:N \szf_print_title:n }
 		
 		\vspace{1em}
 
-    {\normalsize \szf@printmeta \szf@printauthors }
+    {\normalsize \szf_print_metadata:N \szf_print_authors:n }
 
 		\vspace{0.8em}
 
-    {\small \szf@printmeta \szf@printaffiliations }
+    {\small \szf_print_metadata:N \szf_print_affiliations:n }
     
-		\szf@printcorrespondence
+		\szf_print_correspondence:
 		
-    {\szf@printmeta \szf@printabstract}
+    {\szf_print_metadata:N \szf_print_abstract:n}
     
-    {\szf@printmeta \szf@printkeywords}
+    {\szf_print_metadata:N \szf_print_keywords:n}
 		
 	\end{center}
 	
