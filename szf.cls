@@ -93,6 +93,12 @@
   { keywords / english }
   { Keywords }
 
+\prop_gput:Nnn
+  \g_szf_label_prop
+  { correspondence }
+  { Автор~для~переписки }
+
+
 \ExplSyntaxOff
 
 % Собираем титульный лист
@@ -195,16 +201,6 @@
         \textsuperscript{
           \clist_use:Nn \l_tmpa_clist { , }
         }
-      }
-
-    \prop_get:NxN
-      \g_szf_author_prop
-      { #1 / corresponding }
-      \l_tmpa_tl
-
-    \tl_if_eq:NnT \l_tmpa_tl { true }
-      {
-        \textsuperscript{*}
       }
   }
 
@@ -388,8 +384,12 @@
               {
                 \vspace{0.5em}
                 \par
-                \small
-                \textsuperscript{*}
+                \noindent
+                \prop_get:NxN
+                \g_szf_label_prop 
+                { correspondence }
+                \l_tmpb_tl
+                \tl_use:N \l_tmpb_tl{}:~
                 \bool_set_true:N \l_tmpa_bool
               }
 
@@ -407,7 +407,7 @@
 
             \tl_if_blank:VF \l_tmpa_tl
               {
-                :~\tl_use:N \l_tmpa_tl
+                ,~e-mail~\tl_use:N \l_tmpa_tl
               }
 
             \quad
@@ -607,7 +607,7 @@
 
 \cs_new_protected:Npn \szf_print_abstract:n #1
   {
-    \prop_get:NnNT
+    \prop_get:NnN
       \g_szf_abstract_prop
       { #1 }
       \l_tmpa_tl
@@ -615,19 +615,19 @@
       \g_szf_label_prop
       { abstract / #1 }
       \l_tmpb_tl
-      {
-        \vspace{1em}
-        \begin{minipage}{\textwidth}
-          \small
-          \textbf{\tl_use:N \l_tmpb_tl.~}
-          \tl_use:N \l_tmpa_tl
-        \end{minipage}
-      }
+    \par
+    \vspace{1em}
+    {
+      \noindent
+      \textbf{\tl_use:N \l_tmpb_tl.~}
+      \tl_use:N \l_tmpa_tl
+      \par
+    }
   }
 
 \cs_new_protected:Npn \szf_print_keywords:n #1
   {
-    \prop_get:NnNT
+    \prop_get:NnN
       \g_szf_keywords_prop
       { #1 }
       \l_tmpa_tl
@@ -635,24 +635,26 @@
       \g_szf_label_prop
       { keywords / #1 }
       \l_tmpb_tl
+    \par
+    \vspace{0.5em}
     {
-      \vspace{0.5em}
-      \begin{minipage}{\textwidth}
-        \small
-        \textbf{\tl_use:N \l_tmpb_tl{}:~}
-        \tl_use:N \l_tmpa_tl
-      \end{minipage}
+      \noindent
+      \textbf{\tl_use:N \l_tmpb_tl{}:~}
+      \tl_use:N \l_tmpa_tl
+      \par
     }
   }
 
-\cs_new_protected:Npn \szf_print_metadata:N #1
+\cs_new_protected:Npn \szf_print_bilingual:N #1
 {
-  \if@szfreview
-		#1{russian}\par
-    #1{english}\par
-  \else
-		\exp_args:NV #1 \g_szf_language_tl
-  \fi
+  #1{russian}\par
+  #1{english}\par
+}
+
+\cs_new_protected:Npn \szf_print_authors_affiliations:n #1
+{
+  {\centering \normalsize \bfseries \szf_print_authors:n {#1}\par}
+  {\normalsize \itshape \szf_print_affiliations:n {#1}\par}
 }
 
 \ExplSyntaxOff
@@ -661,34 +663,67 @@
 
 \ExplSyntaxOn
 
-\cs_new_protected:Npn \szf_make_title:
+\cs_new_protected:Npn \szf_make_title_review:
 {
   \szf_validate_metadata:
-  \szf_validate_authors:      
-	\begin{center}
+  \szf_validate_authors:
 
-		{\small\raggedright\szf_print_udc: \par}
+		{\raggedright\szf_print_udc: \par}
 
-    {\Large\bfseries \szf_print_metadata:N \szf_print_title:n }
+    %title
+
+    {\centering \normalsize\bfseries \szf_print_bilingual:N \szf_print_title:n \par}
 		
-		\vspace{1em}
+		\vspace{1.2em}
 
-    {\normalsize \szf_print_metadata:N \szf_print_authors:n }
+    {\szf_print_bilingual:N \szf_print_authors_affiliations:n \par}
 
 		\vspace{0.8em}
 
-    {\small \szf_print_metadata:N \szf_print_affiliations:n }
-    
-		\szf_print_correspondence:
+		{\szf_print_correspondence: \par}
 		
-    {\szf_print_metadata:N \szf_print_abstract:n}
+    {\szf_print_bilingual:N \szf_print_abstract:n}
     
-    {\szf_print_metadata:N \szf_print_keywords:n}
-		
-	\end{center}
+    {\szf_print_bilingual:N \szf_print_keywords:n}
 	
-	\vspace{1em}
+	  \vspace{1em}
 }
+
+\cs_new_protected:Npn \szf_make_title_final:
+{
+  \szf_validate_metadata:
+  \szf_validate_authors:
+
+		{\raggedright\szf_print_udc: \par}
+
+    %title
+
+    {\centering \normalsize\bfseries \szf_print_title:n {\g_szf_language_tl} \par}
+		
+		\vspace{1.2em}
+
+    {\szf_print_authors_affiliations:n {\g_szf_language_tl} \par}
+
+		\vspace{0.8em}
+
+		{\szf_print_correspondence: \par}
+		
+    {\szf_print_abstract:n {\g_szf_language_tl}}
+    
+    {\szf_print_keywords:n {\g_szf_language_tl}}
+	
+	  \vspace{1em}
+}
+
+\if@szfreview
+  \cs_new_eq:NN
+    \szf_make_title:
+    \szf_make_title_review:
+\else
+  \cs_new_eq:NN
+    \szf_make_title:
+    \szf_make_title_final:
+\fi
 
 \cs_set_protected:Npn \@maketitle 
 {
