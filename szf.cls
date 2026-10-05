@@ -698,19 +698,19 @@
 
     %title
 
-    {\centering \normalsize\bfseries \szf_print_title:n {\g_szf_language_tl} \par}
+    {\centering \normalsize\bfseries \exp_args:NV \szf_print_title:n \g_szf_language_tl \par}
 		
 		\vspace{1.2em}
 
-    {\szf_print_authors_affiliations:n {\g_szf_language_tl} \par}
+    {\exp_args:NV \szf_print_authors_affiliations:n \g_szf_language_tl \par}
 
 		\vspace{0.8em}
 
 		{\szf_print_correspondence: \par}
 		
-    {\szf_print_abstract:n {\g_szf_language_tl}}
+    {\exp_args:NV \szf_print_abstract:n \g_szf_language_tl}
     
-    {\szf_print_keywords:n {\g_szf_language_tl}}
+    {\exp_args:NV \szf_print_keywords:n \g_szf_language_tl}
 	
 	  \vspace{1em}
 }
