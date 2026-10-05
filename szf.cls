@@ -1,6 +1,15 @@
 \NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \ProvidesClass{szf}[2026/09/11 Journal class]
 
+\RequirePackage{iftex}
+
+\ifLuaTeX
+\else
+  \ClassError{szf}
+    {This~class~requires~LuaLaTeX}
+    {Compile~the~document~with~LuaLaTeX.}
+\fi
+
 % Режим отображения final/review
 
 \newif\if@szfreview
@@ -55,13 +64,14 @@
 
 % Загружаем базовый класс article
 \if@szfreview
-\LoadClass[a4paper,12pt,onecolumn]{article}
+\LoadClass[dvipdfmx,a4paper,12pt,onecolumn]{article}
 \else
-\LoadClass[a4paper,10pt,twocolumn]{article}
+\LoadClass[dvipdfmx,a4paper,10pt,twocolumn]{article}
 \fi
 
 % Определяем язык 
-\RequirePackage[T2A]{fontenc}
+\RequirePackage{fontspec}
+\setmainfont{Times New Roman}
 
 \if@szfrussian
 \RequirePackage[english,russian]{babel}
@@ -749,7 +759,8 @@
 
 % Различия режимов
 \if@szfreview
-% review-specific settings
+  \RequirePackage{setspace}
+  \AtBeginDocument{\onehalfspacing}
 \else
 \setlength{\columnsep}{6mm}
 \fi
