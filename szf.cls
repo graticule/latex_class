@@ -749,24 +749,28 @@
 \fi
 
 % Общая геометрия журнала
-\setlength{\textwidth}{175mm}
-\setlength{\textheight}{240mm}
+\RequirePackage{geometry}
 
-\setlength{\oddsidemargin}{%
-	\dimexpr(\paperwidth-\textwidth)/2-1in\relax
-}
-\setlength{\evensidemargin}{\oddsidemargin}
-
-% Различия режимов
 \if@szfreview
+  \geometry{
+    a4paper,
+    left   = 30mm,
+    right  = 30mm,
+    top    = 20mm,
+    bottom = 20mm
+  }
+
   \RequirePackage{setspace}
   \AtBeginDocument{\onehalfspacing}
-\else
-\setlength{\columnsep}{6mm}
-\fi
 
-\setlength{\headheight}{0pt}
-\setlength{\headsep}{0pt}
-\setlength{\topmargin}{%
-	\dimexpr(\paperheight-\textheight)/2-1in\relax
-}
+\else
+  \geometry{
+    a4paper,
+    textwidth  = 175mm,
+    textheight = 240mm,
+    hcentering,
+    vcentering
+  }
+
+  \setlength{\columnsep}{6mm}
+\fi
