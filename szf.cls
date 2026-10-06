@@ -808,3 +808,17 @@
     \csname the#1\endcsname.\quad
   }
 \fi
+
+\if@szfreview
+
+  \NewDocumentEnvironment{wideformula}{}{}{}
+
+\else
+
+  \RequirePackage{cuted}
+
+  \NewDocumentEnvironment{wideformula}{}
+    {\begin{strip}}
+    {\end{strip}}
+
+\fi
