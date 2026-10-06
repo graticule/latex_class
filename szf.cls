@@ -742,9 +742,11 @@
 
 \ExplSyntaxOff
 
+\RequirePackage{amsmath}
+
 % Нумерация строк в режиме рецензирования
 \if@szfreview
-\RequirePackage{lineno}
+\RequirePackage[mathlines]{lineno}
 \AddToHook{begindocument}{\linenumbers}
 \fi
 
@@ -763,8 +765,6 @@
   \RequirePackage{setspace}
   \AtBeginDocument{\onehalfspacing}
 
-  \setlength{\parindent}{1.25cm}
-
 \else
   \geometry{
     a4paper,
@@ -779,6 +779,14 @@
 
 \if@szfreview
 
+  % Абзацы
+  \setlength{\parindent}{1.25cm}
+  \setlength{\parskip}{0pt}
+
+  % Нумеруем только разделы и подразделы
+  \setcounter{secnumdepth}{2}
+
+  % Раздел
   \renewcommand\section{%
     \@startsection{section}{1}{5mm}%
       {1\baselineskip}%
@@ -786,8 +794,17 @@
       {\normalfont\normalsize\bfseries}%
   }
 
+  % Подраздел
+  \renewcommand\subsection{%
+    \@startsection{subsection}{2}{5mm}%
+      {.75\baselineskip}%
+      {.35\baselineskip}%
+      {\normalfont\normalsize\bfseries}%
+  }
+
+  % 1. Заголовок
+  % 1.1. Заголовок
   \renewcommand\@seccntformat[1]{%
     \csname the#1\endcsname.\quad
   }
-
 \fi
