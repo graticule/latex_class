@@ -55,17 +55,113 @@ English abstract. \lipsum[2]
 	\section*{ВВЕДЕНИЕ}
 	Это текст введения. \lipsum[3]
 
-	\begin{equation}
-  		E = mc^2,\label{eq:energy}
-	\end{equation}
-	где $E$ --- энергия, $m$ --- масса частицы, а $c$ --- скорость света. В формуле \eqref{eq:energy} энергия $E$ --- это энергия покоя.
+% ============================================================
+% Примеры математических конструкций
+% ============================================================
 
-	\lipsum[4]
-	\begin{align}
-	a &= b + c,\\
-	d &= e + f.
-	\end{align}
-	\lipsum[5]
+ Одна нумерованная формула.
+ Использовать для одиночного уравнения.
+\begin{equation}
+  E = mc^2
+  \label{eq:energy}
+\end{equation}
+
+Ссылка на формулу: \eqref{eq:energy}.
+
+
+ Одна ненумерованная формула.
+\begin{equation*}
+  a^2 + b^2 = c^2
+\end{equation*}
+
+
+ Несколько самостоятельных формул с выравниванием по знаку =.
+ Каждая строка получает собственный номер.
+\begin{align}
+  a &= b + c,
+    \label{eq:align-a}\\
+  d &= e + f.
+    \label{eq:align-b}
+\end{align}
+
+
+Несколько строк одной выкладки.
+Номер первой строки подавлен, поэтому номер получает только
+последняя строка.
+\begin{align}
+  F
+    &= a + b + c + d \notag\\
+    &\quad + e + f + g.
+    \label{eq:align-one-number}
+\end{align}
+
+
+Одна формула, разбитая на несколько строк с выравниванием.
+Весь блок имеет один номер.
+\begin{equation}
+  \begin{split}
+    F
+      &= a + b + c + d\\
+      &\quad + e + f + g.
+  \end{split}
+  \label{eq:split}
+\end{equation}
+
+
+Одна длинная формула без естественной точки выравнивания.
+Весь блок имеет один номер.
+\begin{multline}
+  a + b + c + d + e + f + g + h + i + j\\
+  {}+ k + l + m + n + o + p + q + r
+  \label{eq:multline}
+\end{multline}
+
+
+Несколько самостоятельных формул без взаимного выравнивания.
+\begin{gather}
+  E = mc^2,
+    \label{eq:gather-a}\\
+  p = mv.
+    \label{eq:gather-b}
+\end{gather}
+
+
+Кусочно заданная функция. cases автоматически создаёт левую фигурную скобку.
+\begin{equation}
+  f(x) =
+  \begin{cases}
+    x^2,  & x \ge 0,\\
+    -x^2, & x < 0.
+  \end{cases}
+  \label{eq:cases}
+\end{equation}
+
+
+Система уравнений под общей фигурной скобкой.
+Здесь aligned используется как внутренний блок.
+\begin{equation}
+  \left\{
+  \begin{aligned}
+    \dot{x} &= ax + by,\\
+    \dot{y} &= cx + dy.
+  \end{aligned}
+  \right.
+  \label{eq:system}
+\end{equation}
+
+
+Матрица в круглых скобках.
+\begin{equation}
+  A =
+  \begin{pmatrix}
+    a_{11} & a_{12} & a_{13}\\
+    a_{21} & a_{22} & a_{23}\\
+    a_{31} & a_{32} & a_{33}
+  \end{pmatrix}.
+  \label{eq:matrix}
+\end{equation}
+
+\lipsum[1]
 
 	\begin{wideformula}
 	\begin{equation}
