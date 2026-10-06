@@ -763,6 +763,8 @@
   \RequirePackage{setspace}
   \AtBeginDocument{\onehalfspacing}
 
+  \setlength{\parindent}{1.25cm}
+
 \else
   \geometry{
     a4paper,
@@ -773,4 +775,19 @@
   }
 
   \setlength{\columnsep}{6mm}
+\fi
+
+\if@szfreview
+
+  \renewcommand\section{%
+    \@startsection{section}{1}{5mm}%
+      {1\baselineskip}%
+      {.5\baselineskip}%
+      {\normalfont\normalsize\bfseries}%
+  }
+
+  \renewcommand\@seccntformat[1]{%
+    \csname the#1\endcsname.\quad
+  }
+
 \fi
