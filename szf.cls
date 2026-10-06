@@ -64,9 +64,9 @@
 
 % Загружаем базовый класс article
 \if@szfreview
-\LoadClass[dvipdfmx,a4paper,12pt,onecolumn]{article}
+\LoadClass[a4paper,12pt,onecolumn]{article}
 \else
-\LoadClass[dvipdfmx,a4paper,10pt,twocolumn]{article}
+\LoadClass[a4paper,10pt,twocolumn]{article}
 \fi
 
 % Определяем язык 
